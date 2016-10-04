@@ -290,7 +290,7 @@ abstract class AbstractClient
      *
      * @return $this
      */
-    public function setBody($body)
+    protected function setBody($body)
     {
         $this->body = $body;
 
@@ -314,7 +314,7 @@ abstract class AbstractClient
      *
      * @return $this
      */
-    public function setResponseHeaders(array $responseHeaders)
+    protected function setResponseHeaders(array $responseHeaders)
     {
         $this->responseHeaders = $responseHeaders;
 
@@ -338,7 +338,7 @@ abstract class AbstractClient
      *
      * @return $this
      */
-    public function setResponseCode($responseCode)
+    protected function setResponseCode($responseCode)
     {
         $this->responseCode = $responseCode;
 
