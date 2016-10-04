@@ -207,7 +207,7 @@ abstract class AbstractClient
         in_array($method, ['PUT', 'DELETE'], true) and $options[\CURLOPT_CUSTOMREQUEST] = $method;
 
         // Headers
-        count($headers) and $options[\CURLOPT_HEADER] = $headers;
+        count($headers) and $options[\CURLOPT_HTTPHEADER] = $headers;
 
         if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
             $options[\CURLOPT_POSTFIELDS] = $this->encodePayload();
