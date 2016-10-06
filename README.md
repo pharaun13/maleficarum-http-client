@@ -1,6 +1,12 @@
 # Change Log
 This is the Maleficarum HTTP Client implementation. 
 
+## [1.0.3] - 2016-10-06
+### Fixed
+- Fixed headers parsing
+### Added
+- Added getter for request information
+
 ## [1.0.2] - 2016-10-04
 ### Changed
 - Replaced invalid CURLOPT_HEADER option with the valid one - CURLOPT_HTTPHEADER
