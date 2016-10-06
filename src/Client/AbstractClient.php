@@ -55,6 +55,13 @@ abstract class AbstractClient
     protected $body = null;
 
     /**
+     * Internal storage for request info
+     *
+     * @var null|array
+     */
+    protected $info = null;
+
+    /**
      * Internal storage for response headers
      *
      * @var null|array
@@ -149,6 +156,7 @@ abstract class AbstractClient
         // get body part
         $responseBody = mb_substr($response, $info['header_size']);
 
+        $this->setInfo($info);
         $this->setResponseCode($info['http_code']);
         $this->setResponseHeaders($responseHeaders);
         $this->setBody($this->decodeResponse($responseBody));
@@ -225,7 +233,7 @@ abstract class AbstractClient
      */
     protected function parseHeader($header)
     {
-        $splitHeader = explode("\r\n\r\n", trim($header));
+        $splitHeader = explode("\r\n", trim($header));
 
         return $splitHeader;
     }
@@ -293,6 +301,30 @@ abstract class AbstractClient
     protected function setBody($body)
     {
         $this->body = $body;
+
+        return $this;
+    }
+
+    /**
+     * Get info
+     *
+     * @return array
+     */
+    public function getInfo()
+    {
+        return $this->info;
+    }
+
+    /**
+     * Set info
+     *
+     * @param array $info
+     *
+     * @return $this
+     */
+    protected function setInfo(array $info)
+    {
+        $this->info = $info;
 
         return $this;
     }
