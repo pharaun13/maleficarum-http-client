@@ -4,6 +4,7 @@ This is the Maleficarum HTTP Client implementation.
 ## [1.0.3] - 2016-10-06
 ### Fixed
 - Fixed headers parsing
+
 ### Added
 - Added getter for request information
 
