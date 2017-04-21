@@ -19,7 +19,7 @@ abstract class AbstractClient
      *
      * @var array
      */
-    static protected $availableMethods = ['GET', 'POST', 'PUT', 'DELETE'];
+    static protected $availableMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
     /**
      * Internal storage for default curl options
@@ -211,13 +211,13 @@ abstract class AbstractClient
         // POST method
         'POST' === $method and $options[\CURLOPT_POST] = true;
 
-        // PUT, DELETE
-        in_array($method, ['PUT', 'DELETE'], true) and $options[\CURLOPT_CUSTOMREQUEST] = $method;
+        // PUT, PATCH, DELETE
+        in_array($method, ['PUT', 'PATCH', 'DELETE'], true) and $options[\CURLOPT_CUSTOMREQUEST] = $method;
 
         // Headers
         count($headers) and $options[\CURLOPT_HTTPHEADER] = $headers;
 
-        if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
+        if (in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
             $options[\CURLOPT_POSTFIELDS] = $this->encodePayload();
         }
 
