@@ -30,7 +30,8 @@ abstract class AbstractClient
         \CURLOPT_RETURNTRANSFER => true,
         \CURLOPT_HEADER => true,
         \CURLOPT_FOLLOWLOCATION => true,
-        \CURLOPT_MAXREDIRS => 5
+        \CURLOPT_MAXREDIRS => 5,
+        \CURLOPT_TIMEOUT => 600
     ];
 
     /**
