@@ -31,8 +31,15 @@ abstract class AbstractClient
         \CURLOPT_HEADER => true,
         \CURLOPT_FOLLOWLOCATION => true,
         \CURLOPT_MAXREDIRS => 5,
-        \CURLOPT_TIMEOUT => 600
+        \CURLOPT_NOSIGNAL => true
     ];
+
+    /**
+     * Options overriding the $defaultOptions per client instance
+     *
+     * @var array
+     */
+    protected $customOptions = [];
 
     /**
      * Internal storage for the curl object
@@ -207,7 +214,7 @@ abstract class AbstractClient
      */
     protected function prepareOptions($method, array $headers)
     {
-        $options = static::$defaultOptions;
+        $options = array_replace(static::$defaultOptions, $this->customOptions);
 
         // POST method
         'POST' === $method and $options[\CURLOPT_POST] = true;
@@ -434,6 +441,34 @@ abstract class AbstractClient
     private function getCurl()
     {
         return $this->curl;
+    }
+
+    /**
+     * The number of seconds to wait while trying to connect.
+     *
+     * @param int $timeout Use 0 to wait indefinitely.
+     *
+     * @return $this
+     */
+    public function setConnectionTimeout($timeout = 150)
+    {
+        $this->customOptions[\CURLOPT_CONNECTTIMEOUT] = (int) $timeout;
+
+        return $this;
+    }
+
+    /**
+     * The maximum number of seconds to allow cURL functions to execute.
+     *
+     * @param int $timeout
+     *
+     * @return $this
+     */
+    public function setOperationTimeout($timeout = 3600)
+    {
+        $this->customOptions[\CURLOPT_TIMEOUT] = (int) $timeout;
+
+        return $this;
     }
     /* ------------------------------------ Setters & Getters END -------------------------------------- */
 }

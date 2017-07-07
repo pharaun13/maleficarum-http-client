@@ -1,6 +1,11 @@
 # Change Log
 This is the Maleficarum HTTP Client implementation. 
 
+## [1.2.0] - 2017-07-07
+### Added
+- AbstractClient with possibility to set timeouts
+- BasicClient
+
 ## [1.1.0] - 2017-04-21
 ### Added
 - Add PATCH method handling
