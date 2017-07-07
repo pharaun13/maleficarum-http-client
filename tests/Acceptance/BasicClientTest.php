@@ -1,6 +1,6 @@
 <?php
 
-namespace Maleficarum\Client\Http\Tests;
+namespace Maleficarum\Client\Http\Tests\Acceptance;
 
 use Maleficarum\Client\Http\BasicClient;
 use Maleficarum\Client\Http\Curl\Curl;
