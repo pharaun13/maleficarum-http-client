@@ -2,6 +2,8 @@
 /**
  * This class provides functionality common to all HTTP client classes
  */
+declare(strict_types=1);
+
 namespace Maleficarum\Client\Http;
 
 use Maleficarum\Client\Http\Curl\Curl;
@@ -12,8 +14,7 @@ use Maleficarum\Client\Http\Exception\ForbiddenException;
 use Maleficarum\Client\Http\Exception\HttpRequestException;
 use Maleficarum\Client\Http\Exception\NotFoundException;
 
-abstract class AbstractClient
-{
+abstract class AbstractClient {
     /**
      * Internal storage for available HTTP methods
      *
@@ -31,7 +32,7 @@ abstract class AbstractClient
         \CURLOPT_HEADER => true,
         \CURLOPT_FOLLOWLOCATION => true,
         \CURLOPT_MAXREDIRS => 5,
-        \CURLOPT_NOSIGNAL => true
+        \CURLOPT_NOSIGNAL => true,
     ];
 
     /**
@@ -43,7 +44,7 @@ abstract class AbstractClient
 
     /**
      * Internal storage for the curl object
-     * 
+     *
      * @var Curl
      */
     protected $curl;
@@ -104,8 +105,7 @@ abstract class AbstractClient
      * @param Curl $curl
      * @param null|string $apiUrl
      */
-    public function __construct(Curl $curl, $apiUrl = null)
-    {
+    public function __construct(Curl $curl, string $apiUrl = null) {
         $this->curl = $curl;
         $this->apiUrl = $apiUrl;
     }
@@ -127,8 +127,7 @@ abstract class AbstractClient
      * @throws NotFoundException
      * @throws HttpRequestException
      */
-    public function request($path, $method = 'GET', array $headers = [])
-    {
+    public function request(string $path, $method = 'GET', array $headers = []): AbstractClient {
         if (null === $this->getApiUrl()) {
             throw new \RuntimeException(sprintf('API url has not been set! \%s::doRequest()', get_class($this)));
         }
@@ -170,10 +169,18 @@ abstract class AbstractClient
         $this->setBody($this->decodeResponse($responseBody));
 
         if ($this->getResponseCode() < 200 || $this->getResponseCode() >= 300) {
-            if (400 === $this->getResponseCode()) throw new BadRequestException('400 Bad request');
-            if (403 === $this->getResponseCode()) throw new ForbiddenException('403 Forbidden');
-            if (404 === $this->getResponseCode()) throw new NotFoundException('404 Not found');
-            if (409 === $this->getResponseCode()) throw new ConflictException('409 Conflict');
+            if (400 === $this->getResponseCode()) {
+                throw new BadRequestException('400 Bad request');
+            }
+            if (403 === $this->getResponseCode()) {
+                throw new ForbiddenException('403 Forbidden');
+            }
+            if (404 === $this->getResponseCode()) {
+                throw new NotFoundException('404 Not found');
+            }
+            if (409 === $this->getResponseCode()) {
+                throw new ConflictException('409 Conflict');
+            }
 
             throw new HttpRequestException('Response code: ' . $this->getResponseCode());
         }
@@ -193,8 +200,7 @@ abstract class AbstractClient
      *
      * @return string
      */
-    protected function prepareUrl($path)
-    {
+    protected function prepareUrl(string $path): string {
         $url = $this->getApiUrl() . $path;
 
         if (count($this->getGetParams())) {
@@ -212,8 +218,7 @@ abstract class AbstractClient
      *
      * @return array
      */
-    protected function prepareOptions($method, array $headers)
-    {
+    protected function prepareOptions(string $method, array $headers): array {
         $options = array_replace(static::$defaultOptions, $this->customOptions);
 
         // POST method
@@ -239,8 +244,7 @@ abstract class AbstractClient
      *
      * @return array
      */
-    protected function parseHeader($header)
-    {
+    protected function parseHeader(string $header): array {
         $splitHeader = explode("\r\n", trim($header));
 
         return $splitHeader;
@@ -261,17 +265,16 @@ abstract class AbstractClient
      *
      * @return mixed
      */
-    abstract public function decodeResponse($response);
+    abstract public function decodeResponse(string $response);
     /* ------------------------------------ Abstract methods END --------------------------------------- */
 
     /* ------------------------------------ Setters & Getters START ------------------------------------ */
     /**
      * Get apiUrl
      *
-     * @return string
+     * @return null|string
      */
-    public function getApiUrl()
-    {
+    public function getApiUrl(): ?string {
         return $this->apiUrl;
     }
 
@@ -282,8 +285,7 @@ abstract class AbstractClient
      *
      * @return $this
      */
-    public function setApiUrl($apiUrl)
-    {
+    public function setApiUrl(string $apiUrl): AbstractClient {
         $this->apiUrl = $apiUrl;
 
         return $this;
@@ -292,10 +294,9 @@ abstract class AbstractClient
     /**
      * Get body
      *
-     * @return string
+     * @return null|string
      */
-    public function getBody()
-    {
+    public function getBody(): ?string {
         return $this->body;
     }
 
@@ -306,8 +307,7 @@ abstract class AbstractClient
      *
      * @return $this
      */
-    protected function setBody($body)
-    {
+    protected function setBody(string $body): AbstractClient {
         $this->body = $body;
 
         return $this;
@@ -316,10 +316,9 @@ abstract class AbstractClient
     /**
      * Get info
      *
-     * @return array
+     * @return array|null
      */
-    public function getInfo()
-    {
+    public function getInfo(): ?array {
         return $this->info;
     }
 
@@ -330,8 +329,7 @@ abstract class AbstractClient
      *
      * @return $this
      */
-    protected function setInfo(array $info)
-    {
+    protected function setInfo(array $info): AbstractClient {
         $this->info = $info;
 
         return $this;
@@ -340,10 +338,9 @@ abstract class AbstractClient
     /**
      * Get responseHeaders
      *
-     * @return array
+     * @return array|null
      */
-    public function getResponseHeaders()
-    {
+    public function getResponseHeaders(): ?array {
         return $this->responseHeaders;
     }
 
@@ -354,8 +351,7 @@ abstract class AbstractClient
      *
      * @return $this
      */
-    protected function setResponseHeaders(array $responseHeaders)
-    {
+    protected function setResponseHeaders(array $responseHeaders): AbstractClient {
         $this->responseHeaders = $responseHeaders;
 
         return $this;
@@ -364,10 +360,9 @@ abstract class AbstractClient
     /**
      * Get responseCode
      *
-     * @return int
+     * @return int|null
      */
-    public function getResponseCode()
-    {
+    public function getResponseCode(): ?int {
         return $this->responseCode;
     }
 
@@ -378,8 +373,7 @@ abstract class AbstractClient
      *
      * @return $this
      */
-    protected function setResponseCode($responseCode)
-    {
+    protected function setResponseCode(int $responseCode): AbstractClient {
         $this->responseCode = $responseCode;
 
         return $this;
@@ -388,10 +382,9 @@ abstract class AbstractClient
     /**
      * Get getParams
      *
-     * @return array
+     * @return array|null
      */
-    public function getGetParams()
-    {
+    public function getGetParams(): ?array {
         return $this->getParams;
     }
 
@@ -402,8 +395,7 @@ abstract class AbstractClient
      *
      * @return $this
      */
-    public function setGetParams(array $getParams)
-    {
+    public function setGetParams(array $getParams): AbstractClient {
         $this->getParams = $getParams;
 
         return $this;
@@ -412,10 +404,9 @@ abstract class AbstractClient
     /**
      * Get postParams
      *
-     * @return array
+     * @return array|null
      */
-    public function getPostParams()
-    {
+    public function getPostParams(): ?array {
         return $this->postParams;
     }
 
@@ -426,8 +417,7 @@ abstract class AbstractClient
      *
      * @return $this
      */
-    public function setPostParams(array $postParams)
-    {
+    public function setPostParams(array $postParams): AbstractClient {
         $this->postParams = $postParams;
 
         return $this;
@@ -438,8 +428,7 @@ abstract class AbstractClient
      *
      * @return Curl
      */
-    private function getCurl()
-    {
+    private function getCurl(): Curl {
         return $this->curl;
     }
 
@@ -450,9 +439,8 @@ abstract class AbstractClient
      *
      * @return $this
      */
-    public function setConnectionTimeout($timeout = 150)
-    {
-        $this->customOptions[\CURLOPT_CONNECTTIMEOUT] = (int) $timeout;
+    public function setConnectionTimeout(int $timeout = 150): AbstractClient {
+        $this->customOptions[\CURLOPT_CONNECTTIMEOUT] = (int)$timeout;
 
         return $this;
     }
@@ -464,9 +452,8 @@ abstract class AbstractClient
      *
      * @return $this
      */
-    public function setOperationTimeout($timeout = 3600)
-    {
-        $this->customOptions[\CURLOPT_TIMEOUT] = (int) $timeout;
+    public function setOperationTimeout(int $timeout = 3600): AbstractClient {
+        $this->customOptions[\CURLOPT_TIMEOUT] = (int)$timeout;
 
         return $this;
     }

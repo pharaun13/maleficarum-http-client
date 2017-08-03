@@ -1,11 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace Maleficarum\Client\Http\Curl;
 
 use Maleficarum\Client\Http\Curl\Exception\CurlException;
 
-class Curl
-{
+class Curl {
     /**
      * Internal storage for curl handle
      *
@@ -21,8 +21,7 @@ class Curl
      * @return Curl
      * @throws \InvalidArgumentException
      */
-    public function initialize($url)
-    {
+    public function initialize(string $url): Curl {
         if (empty($url)) {
             throw new \InvalidArgumentException('Invalid URL provided. \Maleficarum\Client\Http\Curl::initialize()');
         }
@@ -40,8 +39,7 @@ class Curl
      * @return bool
      * @throws \RuntimeException
      */
-    public function setOptions(array $options)
-    {
+    public function setOptions(array $options): bool {
         if ($this->isInitialized()) {
             throw new \RuntimeException('Initialize cURL session first. \Maleficarum\Client\Http\Curl::setOptions()');
         }
@@ -58,8 +56,7 @@ class Curl
      * @return bool
      * @throws \RuntimeException
      */
-    public function setOption($option, $value)
-    {
+    public function setOption(int $option, $value): bool {
         if ($this->isInitialized()) {
             throw new \RuntimeException('Initialize cURL session first. \Maleficarum\Client\Http\Curl::setOption()');
         }
@@ -74,8 +71,7 @@ class Curl
      * @throws \RuntimeException
      * @throws CurlException
      */
-    public function execute()
-    {
+    public function execute() {
         if ($this->isInitialized()) {
             throw new \RuntimeException('Initialize cURL session first. \Maleficarum\Client\Http\Curl::execute()');
         }
@@ -98,8 +94,7 @@ class Curl
      * @return mixed
      * @throws \RuntimeException
      */
-    public function getInfo($option = null)
-    {
+    public function getInfo(?int $option = null) {
         if ($this->isInitialized()) {
             throw new \RuntimeException('Initialize cURL session first. \Maleficarum\Client\Http\Curl::getInfo()');
         }
@@ -114,8 +109,7 @@ class Curl
      *
      * @throws \RuntimeException
      */
-    public function close()
-    {
+    public function close() {
         if ($this->isInitialized()) {
             throw new \RuntimeException('Initialize cURL session first. \Maleficarum\Client\Http\Curl::close()');
         }
@@ -128,8 +122,7 @@ class Curl
      *
      * @return bool
      */
-    private function isInitialized()
-    {
+    private function isInitialized(): bool {
         return (empty($this->handle) || !(is_resource($this->handle) && 'curl' === get_resource_type($this->handle)));
     }
 }
