@@ -1,6 +1,10 @@
 # Change Log
 This is the Maleficarum HTTP Client implementation. 
 
+## [1.2.1] - 2017-08-09
+### Added
+- Set default operation timeout
+
 ## [1.2.0] - 2017-07-07
 ### Added
 - AbstractClient with possibility to set timeouts
