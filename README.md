@@ -5,6 +5,10 @@ This is the Maleficarum HTTP Client implementation.
 ### Changed
 - Make use of nullable types provided in PHP 7.1 (http://php.net/manual/en/migration71.new-features.php)
 
+## [1.2.1] - 2017-08-09
+### Added
+- Set default operation timeout
+
 ## [1.2.0] - 2017-07-07
 ### Added
 - AbstractClient with possibility to set timeouts

@@ -33,6 +33,7 @@ abstract class AbstractClient {
         \CURLOPT_FOLLOWLOCATION => true,
         \CURLOPT_MAXREDIRS => 5,
         \CURLOPT_NOSIGNAL => true,
+        \CURLOPT_TIMEOUT => 120
     ];
 
     /**
