@@ -308,7 +308,7 @@ abstract class AbstractClient {
      *
      * @return $this
      */
-    protected function setBody(string $body): AbstractClient {
+    protected function setBody($body): AbstractClient {
         $this->body = $body;
 
         return $this;
