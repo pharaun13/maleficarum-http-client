@@ -295,16 +295,16 @@ abstract class AbstractClient {
     /**
      * Get body
      *
-     * @return null|string
+     * @return mixed
      */
-    public function getBody(): ?string {
+    public function getBody() {
         return $this->body;
     }
 
     /**
      * Set body
      *
-     * @param string $body
+     * @param mixed $body
      *
      * @return $this
      */
