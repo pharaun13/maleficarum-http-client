@@ -169,7 +169,7 @@ abstract class AbstractClient {
         $this->setResponseHeaders($responseHeaders);
         $this->setBody($this->decodeResponse($responseBody));
 
-        if ($this->getResponseCode() < 200 || $this->getResponseCode() >= 300) {
+        if ($this->getResponseCode() < 200 || $this->getResponseCode() >= 400) {
             if (400 === $this->getResponseCode()) {
                 throw new BadRequestException('400 Bad request');
             }
