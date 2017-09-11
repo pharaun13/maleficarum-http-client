@@ -1,6 +1,10 @@
 # Change Log
 This is the Maleficarum HTTP Client implementation. 
 
+## [2.0.1] - 2017-09-11
+### Fixed
+- Fix redirects handling
+
 ## [2.0.0] - 2017-08-03
 ### Changed
 - Make use of nullable types provided in PHP 7.1 (http://php.net/manual/en/migration71.new-features.php)
