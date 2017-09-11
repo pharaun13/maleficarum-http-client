@@ -4,6 +4,7 @@ This is the Maleficarum HTTP Client implementation.
 ## [2.0.1] - 2017-09-11
 ### Fixed
 - Fix redirects handling
+- Remove type hint for setBody and getBody methods
 
 ## [2.0.0] - 2017-08-03
 ### Changed
