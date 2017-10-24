@@ -171,19 +171,19 @@ abstract class AbstractClient {
 
         if ($this->getResponseCode() < 200 || $this->getResponseCode() >= 400) {
             if (400 === $this->getResponseCode()) {
-                throw new BadRequestException('400 Bad request');
+                throw new BadRequestException('400 Bad request. Response: ' . $responseBody);
             }
             if (403 === $this->getResponseCode()) {
-                throw new ForbiddenException('403 Forbidden');
+                throw new ForbiddenException('403 Forbidden. Response: ' . $responseBody);
             }
             if (404 === $this->getResponseCode()) {
-                throw new NotFoundException('404 Not found');
+                throw new NotFoundException('404 Not found. Response: ' . $responseBody);
             }
             if (409 === $this->getResponseCode()) {
-                throw new ConflictException('409 Conflict');
+                throw new ConflictException('409 Conflict. Response: ' . $responseBody);
             }
 
-            throw new HttpRequestException('Response code: ' . $this->getResponseCode());
+            throw new HttpRequestException('Response code: ' . $this->getResponseCode() . '. Response: ' . $responseBody);
         }
 
         // clear request parameters
