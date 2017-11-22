@@ -12,6 +12,7 @@ use Maleficarum\Client\Http\Exception\BadRequestException;
 use Maleficarum\Client\Http\Exception\ConflictException;
 use Maleficarum\Client\Http\Exception\ForbiddenException;
 use Maleficarum\Client\Http\Exception\HttpRequestException;
+use Maleficarum\Client\Http\Exception\InvalidArgumentException;
 use Maleficarum\Client\Http\Exception\NotFoundException;
 
 abstract class AbstractClient {
@@ -113,14 +114,15 @@ abstract class AbstractClient {
     /* ------------------------------------ Magic methods END ------------------------------------------ */
 
     /**
-     * Preform HTTP request
+     * Perform HTTP request
      *
      * @param string $path
      * @param string $method
      * @param array $headers
      *
      * @return $this
-     * @throws \RuntimeException
+     *
+     * @throws InvalidArgumentException
      * @throws CurlException
      * @throws BadRequestException
      * @throws ForbiddenException
@@ -130,11 +132,11 @@ abstract class AbstractClient {
      */
     public function request(string $path, $method = 'GET', array $headers = []): AbstractClient {
         if (null === $this->getApiUrl()) {
-            throw new \RuntimeException(sprintf('API url has not been set! \%s::doRequest()', get_class($this)));
+            throw new InvalidArgumentException(sprintf('API url has not been set! \%s::doRequest()', get_class($this)));
         }
 
         if (!in_array($method, self::$availableMethods, true)) {
-            throw new \RuntimeException(sprintf('Unsupported method provided! \%s::doRequest()', get_class($this)));
+            throw new InvalidArgumentException(sprintf('Unsupported method provided! \%s::doRequest()', get_class($this)));
         }
 
         // prepare request url
@@ -156,7 +158,7 @@ abstract class AbstractClient {
         $curl->close();
 
         if (false === $info) {
-            throw new \RuntimeException(sprintf('Unable to complete request. %s::request()', get_class($this)));
+            throw new HttpRequestException(sprintf('Unable to complete request. %s::request()', get_class($this)));
         }
 
         // get header part
@@ -165,25 +167,25 @@ abstract class AbstractClient {
         $responseBody = mb_substr($response, $info['header_size']);
 
         $this->setInfo($info);
-        $this->setResponseCode($info['http_code']);
+        $responseCode = $info['http_code'];
+        $this->setResponseCode($responseCode);
         $this->setResponseHeaders($responseHeaders);
         $this->setBody($this->decodeResponse($responseBody));
 
-        if ($this->getResponseCode() < 200 || $this->getResponseCode() >= 400) {
-            if (400 === $this->getResponseCode()) {
-                throw new BadRequestException('400 Bad request. Response: ' . $responseBody);
+        if ($responseCode < 200 || $responseCode >= 400) {
+            switch ($responseCode) {
+                case 400:
+                    throw new BadRequestException($responseBody);
+                case 403:
+                    throw new ForbiddenException($responseBody);
+                case 404:
+                    throw new NotFoundException($responseBody);
+                case 409:
+                    throw new ConflictException($responseBody);
+                default:
+                    $exceptionCode = $responseCode ?? 0;
+                    throw new HttpRequestException($responseBody, $exceptionCode);
             }
-            if (403 === $this->getResponseCode()) {
-                throw new ForbiddenException('403 Forbidden. Response: ' . $responseBody);
-            }
-            if (404 === $this->getResponseCode()) {
-                throw new NotFoundException('404 Not found. Response: ' . $responseBody);
-            }
-            if (409 === $this->getResponseCode()) {
-                throw new ConflictException('409 Conflict. Response: ' . $responseBody);
-            }
-
-            throw new HttpRequestException('Response code: ' . $this->getResponseCode() . '. Response: ' . $responseBody);
         }
 
         // clear request parameters
@@ -441,7 +443,7 @@ abstract class AbstractClient {
      * @return $this
      */
     public function setConnectionTimeout(int $timeout = 150): AbstractClient {
-        $this->customOptions[\CURLOPT_CONNECTTIMEOUT] = (int)$timeout;
+        $this->customOptions[\CURLOPT_CONNECTTIMEOUT] = $timeout;
 
         return $this;
     }
@@ -454,7 +456,7 @@ abstract class AbstractClient {
      * @return $this
      */
     public function setOperationTimeout(int $timeout = 3600): AbstractClient {
-        $this->customOptions[\CURLOPT_TIMEOUT] = (int)$timeout;
+        $this->customOptions[\CURLOPT_TIMEOUT] = $timeout;
 
         return $this;
     }
