@@ -9,6 +9,11 @@ To catch any kind of exception caused by this client just
 
 There are more specific exceptions as well, eg. `\Maleficarum\Client\Http\Exception\BadRequestException`.
 
+You can get the HTTP response code for any `\Maleficarum\Client\Http\Exception\HttpRequestException` using:
+```php
+$exception->getCode();
+```
+
 # Change Log
 This is the Maleficarum HTTP Client implementation. 
 
