@@ -1,5 +1,28 @@
+# Maleficarum HTTP Client
+
+## Exceptions
+
+To catch any kind of exception caused by this client just
+```php
+} catch (\Maleficarum\Client\Http\Exception\HttpClientException $ex) {
+```
+
+There are more specific exceptions as well, eg. `\Maleficarum\Client\Http\Exception\BadRequestException`.
+
+You can get the HTTP response code for any `\Maleficarum\Client\Http\Exception\HttpRequestException` using:
+```php
+$exception->getCode();
+```
+
 # Change Log
 This is the Maleficarum HTTP Client implementation. 
+
+## [3.0.0] - 2017-11-22
+### Added
+- Exceptions improved
+    - `\Maleficarum\Client\Http\Exception\HttpClientException` lets catching any kind of exception raised by the client
+    - Exception's code reflects the HTTP response code.
+    - Runtime and Logic exceptions used in a better way
 
 ## [2.0.2] - 2017-10-24
 ### Added
