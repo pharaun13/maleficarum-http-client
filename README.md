@@ -7,15 +7,24 @@ To catch any kind of exception caused by this client just
 } catch (\Maleficarum\Client\Http\Exception\HttpClientException $ex) {
 ```
 
-There are more specific exceptions as well, eg. `\Maleficarum\Client\Http\Exception\BadRequestException`.
-
-You can get the HTTP response code for any `\Maleficarum\Client\Http\Exception\HttpRequestException` using:
+You can get the HTTP response details for any `\Maleficarum\Client\Http\Exception\TransferException` using:
 ```php
-$exception->getCode();
+$exception->getStatusCode();
+$exception->getRawResponse();
+$exception->getRequestMethod();
+$exception->getUrl();
 ```
 
 # Change Log
 This is the Maleficarum HTTP Client implementation. 
+
+## [4.0.0] - 2018-06-14
+### Changed
+- This release provides new HTTP client implementation
+    - Removed Curl class
+    - Request exceptions has been replaced by TransferException
+    - Added helper methods for GET, POST, PUT, PATCH and DELETE requests
+    - Added functionality of modifying request options before request is performed (middleware)
 
 ## [3.0.0] - 2017-11-22
 ### Added

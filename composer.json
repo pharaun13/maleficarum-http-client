@@ -1,21 +1,15 @@
 {
     "name": "maleficarum/http-client",
     "description": "HTTP client component",
-    "require": {
-        "php": "^7.1",
-        "ext-curl": "*"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "6.2.*"
-    },
+    "type": "library",
+    "license": "proprietary",
     "autoload": {
         "psr-4": {
-            "Maleficarum\\Client\\Http\\": "src/Client/"
+            "Maleficarum\\Client\\Http\\": "src/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Maleficarum\\Client\\Http\\Tests\\": "tests/"
-        }
+    "require": {
+        "php": "^7.2",
+        "ext-curl": "^7.2"
     }
 }
