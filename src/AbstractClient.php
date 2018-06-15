@@ -400,7 +400,7 @@ abstract class AbstractClient {
         }
 
         if (\in_array($method, [self::METHOD_POST, self::METHOD_PUT, self::METHOD_PATCH, self::METHOD_DELETE], true)) {
-            $postParameters = $curlOptions['postParameters'] ?? [];
+            $postParameters = $options['postParameters'] ?? [];
             $curlOptions[\CURLOPT_POSTFIELDS] = $this->encodePayload($postParameters);
         }
 
