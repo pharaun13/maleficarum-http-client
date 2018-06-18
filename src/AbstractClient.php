@@ -265,7 +265,7 @@ abstract class AbstractClient {
 
         $curlOptions = $this->buildCurlOptions($method, $options);
         foreach ($this->middleware as $middleware) {
-            $curlOptions = $middleware($curlOptions);
+            $curlOptions = $middleware($url, $curlOptions);
         }
 
         $this->doRequest($url, $method, $curlOptions);
