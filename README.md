@@ -18,6 +18,15 @@ $exception->getUrl();
 # Change Log
 This is the Maleficarum HTTP Client implementation. 
 
+## [5.0.0] - 2018-10-10
+### Changed
+- Complete rewrite of the package. New features:
+	- Rest client multi mode implemented. (Better performance for high quantity api calls)
+	- Client level load balancing implemented for both client modes - when creating a new client
+	  instance you pass a set of IPs to load balance over for the specified base url.
+	- Added manual DNS resolve mode for improved performance when the base URL api definition
+	  is constant.
+
 ## [4.0.0] - 2018-06-14
 ### Changed
 - This release provides new HTTP client implementation
