@@ -18,6 +18,9 @@ $exception->getUrl();
 # Change Log
 This is the Maleficarum HTTP Client implementation. 
 
+## [5.0.1] - 2019-05-07
+- Add to TransferException message information about http status code, request method, request url and raw response
+
 ## [5.0.0] - 2018-10-10
 ### Changed
 - Complete rewrite of the package. New features:

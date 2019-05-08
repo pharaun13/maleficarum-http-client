@@ -52,6 +52,8 @@ class TransferException extends HttpClientException {
         $this->requestMethod = $requestMethod;
         $this->url = $url;
 
+        $message = \sprintf('HttpError | %s %s %s ' . PHP_EOL . ' %s', $statusCode, $requestMethod, $url, $rawResponse) . $message;
+
         parent::__construct($message, $code, $previous);
     }
 
