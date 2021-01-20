@@ -20,7 +20,7 @@ This is the Maleficarum HTTP Client implementation.
 
 ## [5.0.2] - 2021-01-20
 ### Changed
-- Add to TransferException message information about http status code, request method, request url and raw response
+- Removed raw response from TransferException
 
 ## [5.0.1] - 2019-05-07
 - Add to TransferException message information about http status code, request method, request url and raw response
