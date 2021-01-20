@@ -46,13 +46,13 @@ class TransferException extends HttpClientException {
      * @param int $code
      * @param \Throwable|null $previous
      */
-    public function __construct(int $statusCode, string $rawResponse, string $requestMethod, string $url, string $message = '', int $code = 0, \Throwable $previous = null) {
+    public function __construct(int $statusCode, string $rawResponse, string $requestMethod, string $url, string $message = 'Request failed.', int $code = 0, \Throwable $previous = null) {
         $this->statusCode = $statusCode;
         $this->rawResponse = $rawResponse;
         $this->requestMethod = $requestMethod;
         $this->url = $url;
 
-        $message = \sprintf('HttpError | %s %s %s ' . PHP_EOL . ' %s', $statusCode, $requestMethod, $url, $rawResponse) . $message;
+        $message = \sprintf('%s HttpError | %s %s %s', $message, $statusCode, $requestMethod, $url);
 
         parent::__construct($message, $code, $previous);
     }
