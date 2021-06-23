@@ -6,6 +6,9 @@ declare(strict_types=1);
 
 namespace Maleficarum\Client\Http;
 
+use Maleficarum\ContextTracing\Carrier\Http\HttpHeader;
+use Maleficarum\ContextTracing\ContextTracker;
+
 abstract class AbstractClient {
     /* ------------------------------------ Class Property START --------------------------------------- */
 
@@ -209,6 +212,14 @@ abstract class AbstractClient {
         $this->baseUrl = $baseUrl;
         $this->parsedBaseUrl = parse_url($this->baseUrl);
         $this->addressDefinitions = $addressDefinitions;
+
+        $this->addMiddleware(static function (string $url, array $options) {
+            $headers = $options[\CURLOPT_HTTPHEADER] ?? [];
+
+            $options[\CURLOPT_HTTPHEADER] = (new HttpHeader())->inject(ContextTracker::getTracer(), $headers);
+
+            return $options;
+        });
     }
     
     /* ------------------------------------ Magic methods END ------------------------------------------ */
