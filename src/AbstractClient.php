@@ -216,7 +216,14 @@ abstract class AbstractClient {
         $this->addMiddleware(static function (string $url, array $options) {
             $headers = $options[\CURLOPT_HTTPHEADER] ?? [];
 
-            $options[\CURLOPT_HTTPHEADER] = (new HttpHeader())->inject(ContextTracker::getTracer(), $headers);
+            $headers = (new HttpHeader())->inject(ContextTracker::getTracer(), $headers);
+            $normalizedHeaders = [];
+            foreach ($headers as $name => $value) {
+                $normalizedHeaders[] = sprintf('%s: %s', $name, $value);
+            }
+            if (!empty($normalizedHeaders)) {
+                $options[\CURLOPT_HTTPHEADER] = $normalizedHeaders;
+            }
 
             return $options;
         });
