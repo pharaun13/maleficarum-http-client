@@ -220,7 +220,7 @@ abstract class AbstractClient {
                 $normalizedHeaders[] = sprintf('%s: %s', $name, $value);
             }
             if (!empty($normalizedHeaders)) {
-                $options[\CURLOPT_HTTPHEADER] = $normalizedHeaders;
+                $options[\CURLOPT_HTTPHEADER] = array_merge($options[\CURLOPT_HTTPHEADER] ?? [], $normalizedHeaders);
             }
 
             return $options;
