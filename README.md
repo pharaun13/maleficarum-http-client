@@ -18,6 +18,11 @@ $exception->getUrl();
 # Change Log
 This is the Maleficarum HTTP Client implementation. 
 
+## [5.1.1] - 2021-09-01
+### Added 
+- Automatic injection of context tracking headers
+- Added dependency to context tracking library
+
 ## [5.0.2] - 2021-01-20
 ### Changed
 - Removed raw response from TransferException
