@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This is the basis for all HTTP client classes. All common HTTP functionality is contained here.
  */
@@ -9,7 +10,8 @@ namespace Maleficarum\Client\Http;
 use Maleficarum\ContextTracing\Carrier\Http\HttpHeader;
 use Maleficarum\ContextTracing\ContextTracker;
 
-abstract class AbstractClient {
+abstract class AbstractClient
+{
     /* ------------------------------------ Class Property START --------------------------------------- */
 
     /**
@@ -45,11 +47,10 @@ abstract class AbstractClient {
     ];
 
 
-
     /**
      * This attribute contains a raw http response returned by the last executed request. This will always be a string
      * (unless a request was never executed by the instance in question) as HTTP responses are text by definition.
-     * 
+     *
      * CAUTION: This contains headers as well.
      *
      * @var string|null
@@ -57,8 +58,8 @@ abstract class AbstractClient {
     protected $rawResponse = null;
 
     /**
-     * Similar to the rawResponse attribute but without headers. This is a raw body form - text - with the response 
-     * headers stripped away. 
+     * Similar to the rawResponse attribute but without headers. This is a raw body form - text - with the response
+     * headers stripped away.
      *
      * EXAMPLE:
      *  - {"status": "OK"}
@@ -69,8 +70,8 @@ abstract class AbstractClient {
 
     /**
      * Response body in a parsed form. In contrast to the body attribute that will always be in test format, parsed
-     * body will often be a structure. 
-     * 
+     * body will often be a structure.
+     *
      * EXAMPLE:
      *  - [
      *      'status' => 'OK'
@@ -84,11 +85,11 @@ abstract class AbstractClient {
      * Contains a full list of response headers in array form. Each header will represent a single array entry.
      * Headers will be in raw form so each array entry will be a single string entry that carries both the name
      * of the headers as well as it's value
-     * 
+     *
      * EXAMPLE:
      *  - [
      *      "Access-Control-Allow-Origin: *"
-     *      "Access-Control-Allow-Methods: *" 
+     *      "Access-Control-Allow-Methods: *"
      *      "Access-Control-Allow-Headers: Content-Type"
      *  ]
      *
@@ -111,16 +112,16 @@ abstract class AbstractClient {
      * @var array
      */
     protected $transferInfo = null;
-    
+
     /**
      * Contains the base URL for the API this client will connect to. Any requests made using this client will
      * always have this base URL prepended to the path specified in request methods (either directly or via
      * the method helpers like get() or post()). Protocol definition MUST be included in the base URL.
-     * 
+     *
      * EXAMPLE:
      *  - 'http://www.github.com/'
      *  - 'https://www.github.com/'
-     * 
+     *
      * @var string
      */
     private $baseUrl = null;
@@ -128,8 +129,8 @@ abstract class AbstractClient {
     /**
      * Contains the parsed form of the base URL - and array that's separated into specific URL sections as defined by the
      * parse_url() function (http://php.net/manual/pl/function.parse-url.php)
-     * 
-     * @var array 
+     *
+     * @var array
      */
     private $parsedBaseUrl = [];
 
@@ -137,14 +138,14 @@ abstract class AbstractClient {
      * This pointer is used to reference the next round robin selection when the address definition list has more than one element.
      * First request will be made to the definition determined based on the time() function. Subsequent requests will use the round
      * robin paradigm.
-     * 
+     *
      * @var int
      */
     private $roundRobinPointer = null;
 
     /**
      * This array defines a list of custom curl options that can be set using setter methods. Anything set via custom options
-     * will override corresponding setting values defined in the DEFAULT_OPTIONS 
+     * will override corresponding setting values defined in the DEFAULT_OPTIONS
      *
      * @var array
      */
@@ -162,9 +163,9 @@ abstract class AbstractClient {
     private $middlewareDefinitions = [];
 
     /* ------------------------------------ Class Property END ----------------------------------------- */
-    
+
     /* ------------------------------------ Abstract methods START ------------------------------------- */
-    
+
     /**
      * Encodes request payload
      *
@@ -182,7 +183,7 @@ abstract class AbstractClient {
      * @return mixed
      */
     abstract protected function decodeResponseBody(string $responseBody);
-    
+
     /**
      * Performs HTTP request.
      *
@@ -193,42 +194,44 @@ abstract class AbstractClient {
      * @return void
      */
     abstract protected function execute(string $url, string $method, array $curlOptions): void;
-    
+
     /* ------------------------------------ Abstract methods END --------------------------------------- */
 
     /* ------------------------------------ Magic methods START ---------------------------------------- */
 
-    public function __construct(string $baseUrl, array $addressDefinitions = []) {
+    public function __construct(string $baseUrl, array $addressDefinitions = [])
+    {
         if (filter_var($baseUrl, \FILTER_VALIDATE_URL) === false) {
-            throw new \InvalidArgumentException(sprintf('Invalid API base url specified. %s::__construct()', static::class));
+            throw new \InvalidArgumentException(
+                sprintf('Invalid API base url specified. %s::__construct()', static::class)
+            );
         }
 
         foreach ($addressDefinitions as $addDef) {
             if (filter_var($addDef, \FILTER_VALIDATE_IP) === false) {
-                throw new \InvalidArgumentException(sprintf('Invalid IP address specified ['.(string)$addDef.']. %s::__construct()', static::class));
+                throw new \InvalidArgumentException(
+                    sprintf('Invalid IP address specified [' . (string)$addDef . ']. %s::__construct()', static::class)
+                );
             }
-        } 
-        
+        }
+
         $this->baseUrl = $baseUrl;
         $this->parsedBaseUrl = parse_url($this->baseUrl);
         $this->addressDefinitions = $addressDefinitions;
 
-        $this->addMiddleware(static function (string $url, array $options) {
-            $headers = (new HttpHeader())->inject(ContextTracker::getTracer(), []);
-            $normalizedHeaders = [];
-            foreach ($headers as $name => $value) {
-                $normalizedHeaders[] = sprintf('%s: %s', $name, $value);
-            }
-            if (!empty($normalizedHeaders)) {
-                $options[\CURLOPT_HTTPHEADER] = array_merge($options[\CURLOPT_HTTPHEADER] ?? [], $normalizedHeaders);
-            }
+        $this->addMiddleware(
+            static function (string $url, array $options) {
+                $headers = (new HttpHeader())->inject(ContextTracker::getTracer(), []);
+                $normalizedHeaders = $this->normalizeHeaders($headers);
+                $options = $this->mergeCurlHeaders($normalizedHeaders, $options);
 
-            return $options;
-        });
+                return $options;
+            }
+        );
     }
-    
+
     /* ------------------------------------ Magic methods END ------------------------------------------ */
-    
+
     /* ------------------------------------ Class Methods START ---------------------------------------- */
 
     /**
@@ -240,11 +243,16 @@ abstract class AbstractClient {
      *
      * @return void
      */
-    public function get(string $url, array $queryParameters = [], array $headers = []): void {
-        $this->request($url, self::METHOD_GET, [
-            'queryParameters' => $queryParameters,
-            'headers' => $headers,
-        ]);
+    public function get(string $url, array $queryParameters = [], array $headers = []): void
+    {
+        $this->request(
+            $url,
+            self::METHOD_GET,
+            [
+                'queryParameters' => $queryParameters,
+                'headers' => $headers,
+            ]
+        );
     }
 
     /**
@@ -257,12 +265,21 @@ abstract class AbstractClient {
      *
      * @return void
      */
-    public function post(string $url, array $postParameters = [], array $queryParameters = [], array $headers = []): void {
-        $this->request($url, self::METHOD_POST, [
-            'postParameters' => $postParameters,
-            'queryParameters' => $queryParameters,
-            'headers' => $headers,
-        ]);
+    public function post(
+        string $url,
+        array $postParameters = [],
+        array $queryParameters = [],
+        array $headers = []
+    ): void {
+        $this->request(
+            $url,
+            self::METHOD_POST,
+            [
+                'postParameters' => $postParameters,
+                'queryParameters' => $queryParameters,
+                'headers' => $headers,
+            ]
+        );
     }
 
     /**
@@ -275,12 +292,17 @@ abstract class AbstractClient {
      *
      * @return void
      */
-    public function put(string $url, array $postParameters = [], array $queryParameters = [], array $headers = []): void {
-        $this->request($url, self::METHOD_PUT, [
-            'postParameters' => $postParameters,
-            'queryParameters' => $queryParameters,
-            'headers' => $headers,
-        ]);
+    public function put(string $url, array $postParameters = [], array $queryParameters = [], array $headers = []): void
+    {
+        $this->request(
+            $url,
+            self::METHOD_PUT,
+            [
+                'postParameters' => $postParameters,
+                'queryParameters' => $queryParameters,
+                'headers' => $headers,
+            ]
+        );
     }
 
     /**
@@ -293,12 +315,21 @@ abstract class AbstractClient {
      *
      * @return void
      */
-    public function patch(string $url, array $postParameters = [], array $queryParameters = [], array $headers = []): void {
-        $this->request($url, self::METHOD_PATCH, [
-            'postParameters' => $postParameters,
-            'queryParameters' => $queryParameters,
-            'headers' => $headers,
-        ]);
+    public function patch(
+        string $url,
+        array $postParameters = [],
+        array $queryParameters = [],
+        array $headers = []
+    ): void {
+        $this->request(
+            $url,
+            self::METHOD_PATCH,
+            [
+                'postParameters' => $postParameters,
+                'queryParameters' => $queryParameters,
+                'headers' => $headers,
+            ]
+        );
     }
 
     /**
@@ -311,12 +342,21 @@ abstract class AbstractClient {
      *
      * @return void
      */
-    public function delete(string $url, array $postParameters = [], array $queryParameters = [], array $headers = []): void {
-        $this->request($url, self::METHOD_DELETE, [
-            'postParameters' => $postParameters,
-            'queryParameters' => $queryParameters,
-            'headers' => $headers,
-        ]);
+    public function delete(
+        string $url,
+        array $postParameters = [],
+        array $queryParameters = [],
+        array $headers = []
+    ): void {
+        $this->request(
+            $url,
+            self::METHOD_DELETE,
+            [
+                'postParameters' => $postParameters,
+                'queryParameters' => $queryParameters,
+                'headers' => $headers,
+            ]
+        );
     }
 
     /**
@@ -328,25 +368,34 @@ abstract class AbstractClient {
      *
      * @return void
      */
-    public function request(string $url, string $method, array $options = []): void {
+    public function request(string $url, string $method, array $options = []): void
+    {
         // establish and validate the URL
-        $url = $this->baseUrl.$url;
+        $url = $this->baseUrl . $url;
 
         if (\filter_var($url, \FILTER_VALIDATE_URL) === false) {
             throw new \InvalidArgumentException(\sprintf('Provided URL "%s" is invalid', $url));
         }
 
         if (\in_array($method, self::AVAILABLE_METHODS, true) === false) {
-            throw new \InvalidArgumentException(\sprintf('Provided method "%s" is invalid. Available methods: %s', $method, \implode(', ', self::AVAILABLE_METHODS)));
+            throw new \InvalidArgumentException(
+                \sprintf(
+                    'Provided method "%s" is invalid. Available methods: %s',
+                    $method,
+                    \implode(', ', self::AVAILABLE_METHODS)
+                )
+            );
         }
 
         $queryParameters = $options['queryParameters'] ?? [];
         $queryString = $this->buildQueryString($queryParameters);
-        
+
         $url .= $queryString;
 
         $curlOptions = $this->buildCurlOptions($method, $options);
-        foreach ($this->middlewareDefinitions as $midDef) $curlOptions = $midDef($url, $curlOptions);
+        foreach ($this->middlewareDefinitions as $midDef) {
+            $curlOptions = $midDef($url, $curlOptions);
+        }
 
         $this->execute($url, $method, $curlOptions);
     }
@@ -359,7 +408,8 @@ abstract class AbstractClient {
      *
      * @return string
      */
-    private function buildQueryString(array $queryParameters): string {
+    private function buildQueryString(array $queryParameters): string
+    {
         if (empty($queryParameters)) {
             return '';
         }
@@ -379,7 +429,8 @@ abstract class AbstractClient {
      *
      * @return array
      */
-    private function buildCurlOptions(string $method, array $options): array {
+    private function buildCurlOptions(string $method, array $options): array
+    {
         // setup basic curl options array
         $curlOptions = \array_replace(self::DEFAULT_OPTIONS, $this->customOptions, [\CURLOPT_CUSTOMREQUEST => $method]);
 
@@ -392,18 +443,18 @@ abstract class AbstractClient {
             // as defined at https://curl.haxx.se/libcurl/c/CURLOPT_RESOLVE.html
             foreach ($this->addressDefinitions as $addDeff) {
                 if ($addDeff !== $ip) {
-                    $resolverOverrides[] = '-'.$this->parsedBaseUrl['host'].':80:'.$addDeff;
-                    $resolverOverrides[] = '-'.$this->parsedBaseUrl['host'].':443:'.$addDeff;
+                    $resolverOverrides[] = '-' . $this->parsedBaseUrl['host'] . ':80:' . $addDeff;
+                    $resolverOverrides[] = '-' . $this->parsedBaseUrl['host'] . ':443:' . $addDeff;
                 }
             }
-            
+
             // these overrides are there to actually force the new override values 
-            $resolverOverrides[] = $this->parsedBaseUrl['host'].':80:'.$ip;
-            $resolverOverrides[] = $this->parsedBaseUrl['host'].':443:'.$ip;
-            
+            $resolverOverrides[] = $this->parsedBaseUrl['host'] . ':80:' . $ip;
+            $resolverOverrides[] = $this->parsedBaseUrl['host'] . ':443:' . $ip;
+
             $curlOptions[\CURLOPT_RESOLVE] = $resolverOverrides;
         }
-        
+
         // make the request a standard POST type for POST method
         if (self::METHOD_POST === $method) {
             $curlOptions[\CURLOPT_POST] = true;
@@ -422,24 +473,25 @@ abstract class AbstractClient {
 
         return $curlOptions;
     }
-    
+
     /**
-     * Returns the address definition that should be used during the next curl call. This will automatically cycle 
+     * Returns the address definition that should be used during the next curl call. This will automatically cycle
      * through the entire set of definitions and circle back to the first definition used before starting again.
-     * 
+     *
      * @return string
      */
-    private function getCurrentAddressDefinition(): string {
+    private function getCurrentAddressDefinition(): string
+    {
         if (is_null($this->roundRobinPointer)) {
             $this->roundRobinPointer = time() % count($this->addressDefinitions);
         }
-        
+
         $addDef = $this->addressDefinitions[$this->roundRobinPointer];
         ++$this->roundRobinPointer >= count($this->addressDefinitions) and $this->roundRobinPointer = 0;
-        
+
         return $addDef;
     }
-    
+
     /* ------------------------------------ Class Methods END ------------------------------------------ */
 
     /* ------------------------------------ Setters & Getters START ------------------------------------ */
@@ -451,7 +503,8 @@ abstract class AbstractClient {
      *
      * @return \Maleficarum\Client\Http\AbstractClient
      */
-    public function addMiddleware(\Closure $middleware): \Maleficarum\Client\Http\AbstractClient {
+    public function addMiddleware(\Closure $middleware): \Maleficarum\Client\Http\AbstractClient
+    {
         $this->middlewareDefinitions[] = $middleware;
         return $this;
     }
@@ -459,7 +512,8 @@ abstract class AbstractClient {
     /**
      * @return string
      */
-    public function getBaseUrl():string {
+    public function getBaseUrl(): string
+    {
         return $this->baseUrl;
     }
 
@@ -468,7 +522,8 @@ abstract class AbstractClient {
      *
      * @return null|string
      */
-    public function getRawResponse(): ?string {
+    public function getRawResponse(): ?string
+    {
         return $this->rawResponse;
     }
 
@@ -477,7 +532,8 @@ abstract class AbstractClient {
      *
      * @return null|string
      */
-    public function getBody(): ?string {
+    public function getBody(): ?string
+    {
         return $this->body;
     }
 
@@ -486,7 +542,8 @@ abstract class AbstractClient {
      *
      * @return mixed
      */
-    public function getParsedBody() {
+    public function getParsedBody()
+    {
         return $this->parsedBody;
     }
 
@@ -495,7 +552,8 @@ abstract class AbstractClient {
      *
      * @return array
      */
-    public function getHeaders(): array {
+    public function getHeaders(): array
+    {
         return $this->headers;
     }
 
@@ -504,7 +562,8 @@ abstract class AbstractClient {
      *
      * @return int|null
      */
-    public function getStatusCode(): ?int {
+    public function getStatusCode(): ?int
+    {
         return $this->statusCode;
     }
 
@@ -513,10 +572,11 @@ abstract class AbstractClient {
      *
      * @return array
      */
-    public function getTransferInfo(): array {
+    public function getTransferInfo(): array
+    {
         return $this->transferInfo;
     }
-    
+
     /**
      * Set connectionTimeout.
      *
@@ -524,7 +584,8 @@ abstract class AbstractClient {
      *
      * @return void
      */
-    public function setConnectionTimeout(int $connectionTimeout): \Maleficarum\Client\Http\AbstractClient {
+    public function setConnectionTimeout(int $connectionTimeout): \Maleficarum\Client\Http\AbstractClient
+    {
         $this->customOptions[\CURLOPT_CONNECTTIMEOUT] = $connectionTimeout;
         return $this;
     }
@@ -536,10 +597,36 @@ abstract class AbstractClient {
      *
      * @return void
      */
-    public function setOperationTimeout(int $operationTimeout): \Maleficarum\Client\Http\AbstractClient {
+    public function setOperationTimeout(int $operationTimeout): \Maleficarum\Client\Http\AbstractClient
+    {
         $this->customOptions[\CURLOPT_TIMEOUT] = $operationTimeout;
         return $this;
     }
-    
+
     /* ------------------------------------ Setters & Getters END -------------------------------------- */
+    /**
+     * @param array<string, string> $headers
+     * @return array<int, string>
+     */
+    protected function normalizeHeaders(array $headers): array
+    {
+        $normalizedHeaders = [];
+        foreach ($headers as $name => $value) {
+            $normalizedHeaders[] = sprintf('%s: %s', $name, $value);
+        }
+        return $normalizedHeaders;
+    }
+
+    /**
+     * @param array<int, string> $normalizedHeaders
+     * @param array $options
+     * @return array
+     */
+    protected function mergeCurlHeaders(array $normalizedHeaders, array $options): array
+    {
+        if (!empty($normalizedHeaders)) {
+            $options[\CURLOPT_HTTPHEADER] = array_merge($options[\CURLOPT_HTTPHEADER] ?? [], $normalizedHeaders);
+        }
+        return $options;
+    }
 }
